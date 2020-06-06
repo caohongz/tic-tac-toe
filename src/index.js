@@ -10,10 +10,12 @@ class Game extends React.Component {
       history: [
         {
           squares: Array(9).fill(null),
+          step: -1,
         },
       ],
       stepNumber: 0,
       xIsNext: true,
+      desc: false,
     };
   }
 
@@ -27,10 +29,12 @@ class Game extends React.Component {
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
+
     squares[i] = this.state.xIsNext ? "X" : "O";
     this.setState({
       history: history.concat({
         squares: squares,
+        step: i,
       }),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -38,30 +42,57 @@ class Game extends React.Component {
   }
   // 切换到历史记录
   jumpTo(move) {
+    const history = this.state.history;
+    console.log("map:", history);
+    console.log("jump", move);
+    console.log("cal", history.slice(0, move + 1));
+
     this.setState({
+      history: history.splice(0, move + 1),
       stepNumber: move,
       xIsNext: move % 2 === 0,
+    });
+  }
+
+  sortMoves() {
+    this.setState({
+      desc: !this.state.desc,
     });
   }
 
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    console.log(current.squares);
+    console.log("current", history);
+    console.log("current1", this.state.stepNumber, current);
     const winner = calculateWinner(current.squares);
     console.log(winner);
     let status = "";
     if (winner) {
-      status = "Winner is: " + winner;
+      status = "Winner is: " + winner[1];
     } else {
       status = "Next step is: " + (this.state.xIsNext ? "X" : "O");
     }
     // 通过数组map得方式输出时光机记录
+    console.log("map history", history);
+
     const moves = history.map((step, move) => {
-      const desc = move ? "Go to move #" + move : "Go to game start";
+      const axis =
+        step.step === -1
+          ? null
+          : parseInt(step.step / 3 + 1) + "行" + ((step.step % 3) + 1) + "列";
+      console.log("step", axis);
+      const desc = move
+        ? "Go to move #" + move + "###" + axis
+        : "Go to game start";
+      let overstriking = "";
+      if (move === history.length - 1) {
+        overstriking = "overstriking";
+      }
       return (
         <li key={move}>
           <button
+            className={overstriking}
             onClick={() => {
               this.jumpTo(move);
             }}
@@ -71,6 +102,7 @@ class Game extends React.Component {
         </li>
       );
     });
+
     return (
       <div className="game">
         <div className="game-board">
@@ -83,7 +115,8 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <div>{moves}</div>
+          <button onClick={() => this.sortMoves()}>sort</button>
+          <div>{this.state.desc ? moves.reverse() : moves}</div>
         </div>
       </div>
     );
@@ -94,6 +127,7 @@ class Board extends React.Component {
   renderSquare(i) {
     return (
       <Square
+        key={i}
         value={this.props.squares[i]}
         onClick={() => {
           this.props.onClick(i);
@@ -102,25 +136,23 @@ class Board extends React.Component {
     );
   }
   render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
+    let lists = [];
+    let num = 0;
+    for (let i = 0; i < 3; i++) {
+      let lineRes = [];
+      for (let j = 0; j < 3; j++) {
+        let square = this.renderSquare(num);
+        lineRes.push(square);
+        num++;
+      }
+      lists.push(
+        <div key={num} className="board-row">
+          {lineRes}
         </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
+      );
+      console.log(lists);
+    }
+    return <div>{lists}</div>;
   }
 }
 // 改为函数式组件
@@ -149,7 +181,7 @@ function calculateWinner(squares) {
     const [a, b, c] = lists[i];
     // 要考虑当前值是否存在
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return [lists[i], squares[a]];
     }
   }
   return null;
