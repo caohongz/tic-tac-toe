@@ -49,6 +49,7 @@
     "react-dev-utils": "^10.2.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
     "resolve": "1.15.0",
     "resolve-url-loader": "3.1.1",
     "sass-loader": "8.0.2",
@@ -63,7 +64,7 @@
     "workbox-webpack-plugin": "4.3.1"
   },
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "node scripts/start.js --sourcemap",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js"
   },
