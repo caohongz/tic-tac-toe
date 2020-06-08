@@ -1,5 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import Board from "./pages/Board";
+import { calculateWinner } from "./pages/Calculate";
+
 import "./index.css";
 
 class Game extends React.Component {
@@ -13,6 +16,17 @@ class Game extends React.Component {
           step: -1,
         },
       ],
+      lists: [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ],
+      count: 0,
       stepNumber: 0,
       xIsNext: true,
       desc: false,
@@ -20,32 +34,33 @@ class Game extends React.Component {
   }
 
   handleClick(i) {
-    const history = this.state.history;
-    // 当前棋盘与stepNumber相关
-    const current = history[this.state.stepNumber];
-    // 采用slice存储新数组
-    const squares = current.squares.slice();
-    // win后者点击格子有值不做操作
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-
-    squares[i] = this.state.xIsNext ? "X" : "O";
-    this.setState({
-      history: history.concat({
-        squares: squares,
-        step: i,
-      }),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-    });
+    try {
+      const history = this.state.history;
+      // 当前棋盘与stepNumber相关
+      const current = history[this.state.stepNumber];
+      // 采用slice存储新数组
+      const squares = current.squares.slice();
+      const lists = this.state.lists;
+      let count = this.state.count;
+      // win或者点击格子有值不做操作
+      if (calculateWinner(lists, squares)[1] || squares[i]) {
+        return;
+      }
+      squares[i] = this.state.xIsNext ? "X" : "O";
+      this.setState({
+        history: history.concat({
+          squares: squares,
+          step: i,
+        }),
+        count: count + 1,
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext,
+      });
+    } catch (error) {}
   }
   // 切换到历史记录
   jumpTo(move) {
     const history = this.state.history;
-    console.log("map:", history);
-    console.log("jump", move);
-    console.log("cal", history.slice(0, move + 1));
 
     this.setState({
       history: history.splice(0, move + 1),
@@ -63,25 +78,24 @@ class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    console.log("current", history);
-    console.log("current1", this.state.stepNumber, current);
-    const winner = calculateWinner(current.squares);
-    console.log(winner);
+    const { lists, count } = this.state;
+    const winner = calculateWinner(lists, current.squares);
     let status = "";
-    if (winner) {
+
+    if (winner[1] && count !== 9) {
       status = "Winner is: " + winner[1];
+    } else if (count === 9) {
+      status = "平局";
     } else {
       status = "Next step is: " + (this.state.xIsNext ? "X" : "O");
     }
     // 通过数组map得方式输出时光机记录
-    console.log("map history", history);
 
     const moves = history.map((step, move) => {
       const axis =
         step.step === -1
           ? null
           : parseInt(step.step / 3 + 1) + "行" + ((step.step % 3) + 1) + "列";
-      console.log("step", axis);
       const desc = move
         ? "Go to move #" + move + "###" + axis
         : "Go to game start";
@@ -108,6 +122,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={current.squares}
+            winner={winner[0]}
             onClick={(i) => {
               this.handleClick(i);
             }}
@@ -121,70 +136,6 @@ class Game extends React.Component {
       </div>
     );
   }
-}
-
-class Board extends React.Component {
-  renderSquare(i) {
-    return (
-      <Square
-        key={i}
-        value={this.props.squares[i]}
-        onClick={() => {
-          this.props.onClick(i);
-        }}
-      />
-    );
-  }
-  render() {
-    let lists = [];
-    let num = 0;
-    for (let i = 0; i < 3; i++) {
-      let lineRes = [];
-      for (let j = 0; j < 3; j++) {
-        let square = this.renderSquare(num);
-        lineRes.push(square);
-        num++;
-      }
-      lists.push(
-        <div key={num} className="board-row">
-          {lineRes}
-        </div>
-      );
-      console.log(lists);
-    }
-    return <div>{lists}</div>;
-  }
-}
-// 改为函数式组件
-function Square(props) {
-  // console.log(props);
-
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
-// 计算是否获胜
-function calculateWinner(squares) {
-  const lists = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lists.length; i++) {
-    const [a, b, c] = lists[i];
-    // 要考虑当前值是否存在
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return [lists[i], squares[a]];
-    }
-  }
-  return null;
 }
 
 // ========================================
