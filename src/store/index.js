@@ -1,42 +1,47 @@
 import { createStore, combineReducers } from "redux";
 
-// const gameState = {
-//   history: [
-//     {
-//       squares: [null, null, null, null, null, null, null, null, null],
-//       step: -1,
-//     },
-//   ],
-//   lists: [
-//     [0, 1, 2],
-//     [3, 4, 5],
-//     [6, 7, 8],
-//     [0, 4, 8],
-//     [1, 4, 7],
-//     [2, 5, 8],
-//     [2, 4, 6],
-//   ],
-//   count: 0,
-//   i: -1,
-//   xIsNext: true,
-//   stepNumber: 0,
-// };
-const taskListData = {
-  loading: true,
-  error: false,
-  taskList: [],
+const defaultState = {
+  history: [{ squares: Array(9).fill(null) }],
+  lists: [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ],
+  count: 0,
+  stepNumber: 0,
+  xIsNext: true,
+  desc: false,
 };
-
-export const tictactoeReducer = (
-  state = { taskListData },
-  // state = { count: 0 },
-  { type }
-) => {
+export const tictactoeReducer = (state = defaultState, { type, payload }) => {
   switch (type) {
-    case "SHOW":
-      return { ...state };
+    case "CLICK":
+      console.log("payload", state.history.length);
+      // state.stepNumber = state.history.length;
+      // state.history = state.history.concat([
+      //   {
+      //     squares: payload,
+      //   },
+      // ]);
+      console.log("click", state);
+
+      return Object.assign({}, state, {
+        history: state.history.concat([
+          {
+            squares: payload,
+          },
+        ]),
+        stepNumber: state.history.length,
+      });
+
+    default:
+      return state;
   }
 };
 
-const store = createStore(tictactoeReducer);
+const store = createStore(combineReducers({ history: tictactoeReducer }));
 export default store;
