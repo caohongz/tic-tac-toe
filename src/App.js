@@ -1,6 +1,6 @@
 import React from "react";
 import Board from "./pages/Board";
-// import { calculateWinner } from "./utils/";
+import { calculateWinner } from "./utils/";
 import { connect } from "react-redux";
 
 import "./index.css";
@@ -16,7 +16,10 @@ export default connect(
       const history = this.props.history;
       const current = history.history[history.stepNumber];
       const squares = current.squares.slice();
-      squares[i] = "X";
+      if (calculateWinner(history.lists, current.squares)[1] || squares[i]) {
+        return null;
+      }
+      squares[i] = history.xIsNext ? "X" : "O";
       console.log(squares);
 
       this.props.click(squares);
@@ -24,6 +27,13 @@ export default connect(
     render() {
       const history = this.props.history;
       const current = history.history[history.stepNumber];
+      let winner = calculateWinner(history.lists, current.squares);
+      let status = "";
+      if (winner[1]) {
+        status = "winner is: " + winner[1];
+      } else {
+        status = "next is: " + (history.xIsNext ? "X" : "O");
+      }
       console.log("state", history.stepNumber, current);
 
       return (
@@ -38,8 +48,8 @@ export default connect(
           </div>
 
           <div className="game-info">
-            {/* <div>{status}</div>
-            <div style={{ margin: 20 }}>
+            <div>{status}</div>
+            {/* <div style={{ margin: 20 }}>
               <button onClick={() => this.sortMoves()}>sort</button>
             </div>
             <div>{this.props.desc ? moves.reverse() : moves}</div> */}

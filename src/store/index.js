@@ -36,6 +36,7 @@ export const tictactoeReducer = (state = defaultState, { type, payload }) => {
           },
         ]),
         stepNumber: state.history.length,
+        xIsNext: !state.xIsNext,
       });
 
     default:
