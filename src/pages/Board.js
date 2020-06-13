@@ -7,7 +7,7 @@ export default class Board extends Component {
       <Square
         key={i}
         num={i}
-        // winner={this.props.winner}
+        winner={this.props.winner}
         value={this.props.squares[i]}
         onClick={() => {
           this.props.onClick(i);
