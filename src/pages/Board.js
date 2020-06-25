@@ -29,7 +29,6 @@ export default class Board extends Component {
         </div>
       );
     }
-    console.log("board", this.props.squares);
 
     return <div>{list}</div>;
   }
