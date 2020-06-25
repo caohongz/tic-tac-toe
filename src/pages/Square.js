@@ -1,20 +1,13 @@
-import React from "react";
-// 改为函数式组件
-export default function Square(props) {
-  // console.log(props);
-  // const { winner, num } = props;
-  // const { num } = props;
-  let className = "";
+import React, { Component } from "react";
 
-  // if (winner.includes(num)) {
-  //   className = "winner-button";
-  // } else {
-  className = "square";
+export default class Square extends Component {
+  render() {
+    console.log("square", this.props.square);
 
-  // }
-  return (
-    <button className={className} onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
+    return (
+      <button className="square" onClick={this.props.onClick}>
+        {this.props.square}
+      </button>
+    );
+  }
 }

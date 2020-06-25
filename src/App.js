@@ -1,61 +1,69 @@
-import React from "react";
+import React, { Component } from "react";
 import Board from "./pages/Board";
-import { calculateWinner } from "./utils/";
-import { connect } from "react-redux";
+import { winnerCalulate } from "./utils/";
 
-import "./index.css";
-
-export default connect(
-  ({ history }) => ({ history }),
-  (dispatch) => ({
-    click: (payload) => dispatch({ type: "CLICK", payload }),
-  })
-)(
-  class Game extends React.Component {
-    handleClick(i) {
-      const history = this.props.history;
-      const current = history.history[history.stepNumber];
-      const squares = current.squares.slice();
-      if (calculateWinner(history.lists, current.squares)[1] || squares[i]) {
-        return null;
-      }
-      squares[i] = history.xIsNext ? "X" : "O";
-      console.log(squares);
-
-      this.props.click(squares);
-    }
-    render() {
-      const history = this.props.history;
-      const current = history.history[history.stepNumber];
-      let winner = calculateWinner(history.lists, current.squares);
-      let status = "";
-      if (winner[1]) {
-        status = "winner is: " + winner[1];
-      } else {
-        status = "next is: " + (history.xIsNext ? "X" : "O");
-      }
-      console.log("state", history.stepNumber, current);
-
-      return (
-        <div className="game">
-          <div className="game-board">
-            <Board
-              squares={current.squares}
-              // winner={winner[0]}
-              onClick={(i) => this.handleClick(i)}
-            />
-            {/* <p>{this.props.show}</p> */}
-          </div>
-
-          <div className="game-info">
-            <div>{status}</div>
-            {/* <div style={{ margin: 20 }}>
-              <button onClick={() => this.sortMoves()}>sort</button>
-            </div>
-            <div>{this.props.desc ? moves.reverse() : moves}</div> */}
-          </div>
-        </div>
-      );
-    }
+export default class Game extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{ squares: Array(9).fill(null), step: -1 }],
+      lists: [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 4, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [2, 4, 6],
+      ],
+      stepNumber: 0,
+      xIsNext: true,
+    };
   }
-);
+
+  handleChange(i) {
+    const history = this.state.history;
+
+    const current = history[this.state.stepNumber];
+    const squares = current.squares.slice();
+    let winner = winnerCalulate(this.state.lists, squares);
+    console.log("winner", winner);
+
+    if (winner !== undefined || squares[i] !== null) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat({ squares, step: i }),
+      xIsNext: !this.state.xIsNext,
+      stepNumber: this.state.stepNumber + 1,
+    });
+    console.log("handle", squares, this.state.xIsNext);
+  }
+
+  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const lists = this.state.lists;
+    let winner = winnerCalulate(lists, current.squares);
+    let desc = "";
+    if (winner && winner[1]) {
+      desc = "winner is: " + winner[1];
+      console.log("desc", desc);
+    } else {
+      desc = "next is: " + this.state.xIsNext ? "X" : "O";
+    }
+    return (
+      <div className="game">
+        <div className="game-board">
+          <Board
+            squares={current.squares}
+            onClick={(i) => this.handleChange(i)}
+          />
+        </div>
+        <div className="game-info">{desc}</div>
+      </div>
+    );
+  }
+}

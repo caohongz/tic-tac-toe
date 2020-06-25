@@ -2,35 +2,35 @@ import React, { Component } from "react";
 import Square from "./Square";
 
 export default class Board extends Component {
-  renderSquare(i) {
+  renderSquare(j) {
     return (
       <Square
-        key={i}
-        num={i}
-        // winner={this.props.winner}
-        value={this.props.squares[i]}
+        key={j}
+        i={j}
+        square={this.props.squares[j]}
         onClick={() => {
-          this.props.onClick(i);
+          this.props.onClick(j);
         }}
       />
     );
   }
+
   render() {
-    let lists = [];
-    let num = 0;
-    for (let i = 0; i < 3; i++) {
+    let list = [];
+    for (let i = 0; i < 9; i += 3) {
       let lineRes = [];
-      for (let j = 0; j < 3; j++) {
-        let square = this.renderSquare(num);
+      for (let j = i; j < i + 3; j++) {
+        let square = this.renderSquare(j);
         lineRes.push(square);
-        num++;
       }
-      lists.push(
-        <div key={num} className="board-row">
+      list.push(
+        <div className="board-row" key={i}>
           {lineRes}
         </div>
       );
     }
-    return <div>{lists}</div>;
+    console.log("board", this.props.squares);
+
+    return <div>{list}</div>;
   }
 }
